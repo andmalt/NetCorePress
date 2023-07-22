@@ -1,5 +1,6 @@
 using System.ComponentModel.DataAnnotations;
 using NetCorePress.Models.Enums;
+using NetCorePress.Authentication;
 
 namespace NetCorePress.Models
 {
@@ -15,12 +16,15 @@ namespace NetCorePress.Models
         [MinLength(1, ErrorMessage = "Il test deve contenere almeno un carattere")]
         public string? Message { get; set; }
 
-        public int IdUser { get; set; }
+        public string? UserId { get; set; }
 
         public Category Category { get; set; }
 
         public DateTime? CreationDate { get; set; }
 
         public DateTime? UpdateDate { get; set; }
+
+        // relationship below
+        public virtual ApplicationUser? User { get; set; }
     }
 }
