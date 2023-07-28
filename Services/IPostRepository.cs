@@ -9,8 +9,11 @@ namespace NetCorePress.Services
     public interface IPostRepository
     {
         Task<bool> Save();
-        ICollection<Post> AllPost();
+        Task<ICollection<Post>> AllPost();
         Task<Post> SelectPost(int id);
+        Task<bool> ExistPost(int id);
         Task<bool> CreatePost(Post post);
+        Task<bool> UpdatePost(Post post);
+        Task<bool> DeletePost(Post post);
     }
 }

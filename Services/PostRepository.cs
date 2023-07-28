@@ -1,5 +1,3 @@
-using Microsoft.AspNetCore.Mvc;
-using Microsoft.AspNetCore.Authorization;
 using System.Threading.Tasks;
 using NetCorePress.Authentication;
 using NetCorePress.Models;
@@ -32,16 +30,16 @@ namespace NetCorePress.Services
             return saved >= 0 ? true : false;
         }
 
-        public async Task<bool> CreatePost(Post post)
+        public async Task<bool> ExistPost(int id)
         {
-            // added a new post in the database
-            await _applicationDbContext.AddAsync(post);
-            return await Save();
+            return await _applicationDbContext
+            .Posts
+            .AnyAsync(c => c.Id == id);
         }
 
-        public ICollection<Post> AllPost()
+        public async Task<ICollection<Post>> AllPost()
         {
-            List<Post> posts = _applicationDbContext.Posts.ToList();
+            List<Post> posts = await _applicationDbContext.Posts.ToListAsync();
             return posts;
         }
 
@@ -53,5 +51,25 @@ namespace NetCorePress.Services
 
             return post!;
         }
+
+        public async Task<bool> CreatePost(Post post)
+        {
+            // added a new post in the database
+            await _applicationDbContext.AddAsync(post);
+            return await Save();
+        }
+
+        public async Task<bool> UpdatePost(Post post)
+        {
+            _applicationDbContext.Update(post);
+            return await Save();
+        }
+
+        public async Task<bool> DeletePost(Post post)
+        {
+            _applicationDbContext.Remove(post);
+            return await Save();
+        }
+
     }
 }

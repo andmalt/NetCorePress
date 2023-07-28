@@ -1,4 +1,3 @@
-using System.Threading.Tasks;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using NetCorePress.Authentication;
@@ -12,6 +11,7 @@ namespace NetCorePress.Controllers
 {
     [ApiController]
     [Route("api/post")]
+    [Authorize(AuthenticationSchemes = "Bearer")]
     public class PostController : ControllerBase
     {
         private readonly IPostRepository _postRepository;
@@ -30,8 +30,74 @@ namespace NetCorePress.Controllers
         }
 
         [HttpPost]
+        [Route("all-posts")]
+        public async Task<IActionResult> GetAllPosts()
+        {
+
+            var posts = await _postRepository.AllPost();
+
+            if (posts.Count == 0)
+            {
+                return NotFound(string.Format("Non è stato trovato nessun articolo"));
+            }
+            var newPosts = new List<PostDto>();
+
+            foreach (var post in posts)
+            {
+                var newPost = new PostDto();
+                newPost.Id = post.Id;
+                newPost.Title = post.Title;
+                newPost.Message = post.Message;
+                newPost.UserId = post.UserId;
+                newPost.Category = post.Category;
+                newPost.CreationDate = post.CreationDate;
+                newPost.UpdateDate = post.UpdateDate;
+                newPosts.Add(newPost);
+            }
+
+            var response = new Response<ICollection<PostDto>>();
+            response.Success = true;
+            response.Message = "Post elencati con successo!";
+            response.Items = newPosts;
+
+            return Ok(response);
+        }
+
+        [HttpPost]
+        [Route("get-post/{id}")]
+        public async Task<IActionResult> GetPost(int id)
+        {
+            var post = await _postRepository.SelectPost(id);
+
+            var existPost = await _postRepository.ExistPost(post.Id);
+
+            if (!existPost)
+            {
+                var resp = new Response();
+                resp.Success = false;
+                resp.Message = string.Format("Non è stato trovato il post!");
+                return NotFound(resp);
+            }
+
+            var newPost = new PostDto();
+            newPost.Id = post.Id;
+            newPost.Title = post.Title;
+            newPost.Message = post.Message;
+            newPost.UserId = post.UserId;
+            newPost.Category = post.Category;
+            newPost.CreationDate = post.CreationDate;
+            newPost.UpdateDate = post.UpdateDate;
+
+            var response = new Response<PostDto>();
+            response.Success = true;
+            response.Message = "Post trovato con successo!";
+            response.Items = newPost;
+
+            return Ok(response);
+        }
+
+        [HttpPost]
         [Route("create")]
-        [Authorize(AuthenticationSchemes = "Bearer")]
         public async Task<IActionResult> Create([FromBody] Post post)
         {
             if (!ModelState.IsValid)
@@ -65,6 +131,78 @@ namespace NetCorePress.Controllers
             response.Success = true;
             response.Message = "Post creato con successo!";
             response.Items = newPost;
+
+            return Ok(response);
+        }
+
+        [HttpPut]
+        [Route("update")]
+        public async Task<IActionResult> UpdatePost([FromBody] Post post)
+        {
+            if (!ModelState.IsValid)
+            {
+                return BadRequest(ModelState);
+            }
+
+            var existPost = await _postRepository.ExistPost(post.Id);
+
+            if (!existPost)
+            {
+                var resp = new Response();
+                resp.Success = false;
+                resp.Message = string.Format("Non è stato trovato il post!");
+                return NotFound(resp);
+            }
+
+            post.UpdateDate = DateTime.Now;
+            ClaimsPrincipal userClaimsPrincipal = _httpContextAccessor.HttpContext!.User;
+            post.UserId = _userManager.GetUserId(userClaimsPrincipal);
+
+            bool isUpdated = await _postRepository.UpdatePost(post);
+
+            if (!isUpdated)
+            {
+                ModelState.AddModelError("", $"Ci sono stati problemi nella modifica del post '{post.Title}' ");
+                return StatusCode(500, ModelState);
+            }
+
+            var response = new Response();
+            response.Message = "Post modificato correttamente!";
+            response.Success = true;
+
+            return Ok(response);
+        }
+
+        [HttpDelete]
+        [Route("delete")]
+        public async Task<IActionResult> RemovePost([FromBody] Post post)
+        {
+            if (!ModelState.IsValid)
+            {
+                return BadRequest(ModelState);
+            }
+
+            var existPost = await _postRepository.ExistPost(post.Id);
+
+            if (!existPost)
+            {
+                var resp = new Response();
+                resp.Success = false;
+                resp.Message = string.Format("Non è stato trovato il post!");
+                return NotFound(resp);
+            }
+
+            bool isDeleted = await _postRepository.DeletePost(post);
+
+            if (!isDeleted)
+            {
+                ModelState.AddModelError("", $"Ci sono stati problemi nella cancellazione del post '{post.Title}' ");
+                return StatusCode(500, ModelState);
+            }
+
+            var response = new Response();
+            response.Message = "Post cancellato correttamente!";
+            response.Success = true;
 
             return Ok(response);
         }

@@ -1,4 +1,3 @@
-using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
 using NetCorePress.Models;
@@ -17,6 +16,10 @@ namespace NetCorePress.Authentication
         protected override void OnModelCreating(ModelBuilder builder)
         {
             base.OnModelCreating(builder);
+
+            builder.Entity<Post>()
+            .HasIndex(p => p.Title)
+            .IsUnique();
 
             builder.Entity<Post>()
             .HasOne<ApplicationUser>(p => p.User)
