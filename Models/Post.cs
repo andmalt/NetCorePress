@@ -17,7 +17,6 @@ namespace NetCorePress.Models
         [MinLength(1, ErrorMessage = "Il messaggio deve contenere almeno un carattere")]
         public string? Message { get; set; }
 
-        [Required]
         public string? UserId { get; set; }
 
         [Required]
@@ -27,7 +26,9 @@ namespace NetCorePress.Models
 
         public DateTime? UpdateDate { get; set; }
 
-        // below the relationship with users
+        // below the relationship with users and comments
         public virtual ApplicationUser? User { get; set; }
+
+        public virtual ICollection<Comment>? Comments { get; set; }
     }
 }

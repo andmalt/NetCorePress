@@ -23,8 +23,18 @@ namespace NetCorePress.Authentication
 
             builder.Entity<Post>()
             .HasOne<ApplicationUser>(p => p.User)
-            .WithMany(s => s.Posts)
+            .WithMany(a => a.Posts)
             .HasForeignKey(p => p.UserId);
+
+            builder.Entity<Comment>()
+            .HasOne<Post>(c => c.Post)
+            .WithMany(p => p.Comments)
+            .HasForeignKey(c => c.PostId);
+
+            builder.Entity<Comment>()
+            .HasOne<ApplicationUser>(c => c.User)
+            .WithMany(a => a.Comments)
+            .HasForeignKey(c => c.UserId);
         }
     }
 }
