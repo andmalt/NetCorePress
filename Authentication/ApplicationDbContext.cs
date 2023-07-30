@@ -7,6 +7,7 @@ namespace NetCorePress.Authentication
     public class ApplicationDbContext : IdentityDbContext<ApplicationUser>
     {
         public virtual DbSet<Post> Posts => Set<Post>();
+        public virtual DbSet<Comment> Comments => Set<Comment>();
 
         public ApplicationDbContext(DbContextOptions<ApplicationDbContext> options) : base(options)
         {
