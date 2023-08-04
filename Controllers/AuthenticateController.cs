@@ -15,16 +15,13 @@ namespace NetCorePress.Controllers
     public class AuthenticateController : ControllerBase
     {
         private readonly UserManager<ApplicationUser> _userManager;
-        private readonly RoleManager<IdentityRole> _roleManager;
         private readonly IConfiguration _configuration;
 
         public AuthenticateController(
             UserManager<ApplicationUser> userManager,
-            RoleManager<IdentityRole> roleManager,
             IConfiguration configuration)
         {
             _userManager = userManager;
-            _roleManager = roleManager;
             _configuration = configuration;
         }
 
@@ -93,7 +90,7 @@ namespace NetCorePress.Controllers
         public async Task<IActionResult> Logout()
         {
             await HttpContext.SignOutAsync(); // logout
-            return Ok(new { Status = "Success", Message = "Logged out successfully." });
+            return Ok(new Response { Success = true, Message = "Logged out successfully." });
         }
 
         private JwtSecurityToken GetToken(List<Claim> authClaims)

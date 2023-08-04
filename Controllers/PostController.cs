@@ -44,21 +44,25 @@ namespace NetCorePress.Controllers
 
             foreach (var post in posts)
             {
-                var newPost = new PostDto();
-                newPost.Id = post.Id;
-                newPost.Title = post.Title;
-                newPost.Message = post.Message;
-                newPost.UserId = post.UserId;
-                newPost.Category = post.Category;
-                newPost.CreationDate = post.CreationDate;
-                newPost.UpdateDate = post.UpdateDate;
+                var newPost = new PostDto
+                {
+                    Id = post.Id,
+                    Title = post.Title,
+                    Message = post.Message,
+                    UserId = post.UserId,
+                    Category = post.Category,
+                    CreationDate = post.CreationDate,
+                    UpdateDate = post.UpdateDate
+                };
                 newPosts.Add(newPost);
             }
 
-            var response = new Response<ICollection<PostDto>>();
-            response.Success = true;
-            response.Message = "Post elencati con successo!";
-            response.Items = newPosts;
+            var response = new Response<ICollection<PostDto>>
+            {
+                Success = true,
+                Message = "Post elencati con successo!",
+                Items = newPosts
+            };
 
             return Ok(response);
         }
@@ -67,31 +71,37 @@ namespace NetCorePress.Controllers
         [Route("get-post/{id}")]
         public async Task<IActionResult> GetPost(int id)
         {
-            var post = await _postRepository.SelectPost(id);
-
-            var existPost = await _postRepository.ExistPost(post.Id);
+            var existPost = await _postRepository.ExistPost(id);
 
             if (!existPost)
             {
-                var resp = new Response();
-                resp.Success = false;
-                resp.Message = string.Format("Non è stato trovato il post!");
+                var resp = new Response
+                {
+                    Success = false,
+                    Message = string.Format("Non è stato trovato il post!")
+                };
                 return NotFound(resp);
             }
 
-            var newPost = new PostDto();
-            newPost.Id = post.Id;
-            newPost.Title = post.Title;
-            newPost.Message = post.Message;
-            newPost.UserId = post.UserId;
-            newPost.Category = post.Category;
-            newPost.CreationDate = post.CreationDate;
-            newPost.UpdateDate = post.UpdateDate;
+            var post = await _postRepository.SelectPost(id);
 
-            var response = new Response<PostDto>();
-            response.Success = true;
-            response.Message = "Post trovato con successo!";
-            response.Items = newPost;
+            var newPost = new PostDto
+            {
+                Id = post.Id,
+                Title = post.Title,
+                Message = post.Message,
+                UserId = post.UserId,
+                Category = post.Category,
+                CreationDate = post.CreationDate,
+                UpdateDate = post.UpdateDate
+            };
+
+            var response = new Response<PostDto>
+            {
+                Success = true,
+                Message = "Post trovato con successo!",
+                Items = newPost
+            };
 
             return Ok(response);
         }
@@ -118,19 +128,23 @@ namespace NetCorePress.Controllers
                 return StatusCode(500, ModelState);
             }
 
-            var newPost = new PostDto();
-            newPost.Id = post.Id;
-            newPost.Title = post.Title;
-            newPost.Message = post.Message;
-            newPost.UserId = post.UserId;
-            newPost.Category = post.Category;
-            newPost.CreationDate = post.CreationDate;
-            newPost.UpdateDate = post.UpdateDate;
+            var newPost = new PostDto
+            {
+                Id = post.Id,
+                Title = post.Title,
+                Message = post.Message,
+                UserId = post.UserId,
+                Category = post.Category,
+                CreationDate = post.CreationDate,
+                UpdateDate = post.UpdateDate
+            };
 
-            var response = new Response<PostDto>();
-            response.Success = true;
-            response.Message = "Post creato con successo!";
-            response.Items = newPost;
+            var response = new Response<PostDto>
+            {
+                Success = true,
+                Message = "Post creato con successo!",
+                Items = newPost
+            };
 
             return Ok(response);
         }
@@ -148,9 +162,11 @@ namespace NetCorePress.Controllers
 
             if (!existPost)
             {
-                var resp = new Response();
-                resp.Success = false;
-                resp.Message = string.Format("Non è stato trovato il post!");
+                var resp = new Response
+                {
+                    Success = false,
+                    Message = string.Format("Non è stato trovato il post!")
+                };
                 return NotFound(resp);
             }
 
@@ -166,9 +182,11 @@ namespace NetCorePress.Controllers
                 return StatusCode(500, ModelState);
             }
 
-            var response = new Response();
-            response.Message = "Post modificato correttamente!";
-            response.Success = true;
+            var response = new Response
+            {
+                Message = "Post modificato correttamente!",
+                Success = true
+            };
 
             return Ok(response);
         }
@@ -186,9 +204,11 @@ namespace NetCorePress.Controllers
 
             if (!existPost)
             {
-                var resp = new Response();
-                resp.Success = false;
-                resp.Message = string.Format("Non è stato trovato il post!");
+                var resp = new Response
+                {
+                    Success = false,
+                    Message = string.Format("Non è stato trovato il post!")
+                };
                 return NotFound(resp);
             }
 
@@ -200,9 +220,11 @@ namespace NetCorePress.Controllers
                 return StatusCode(500, ModelState);
             }
 
-            var response = new Response();
-            response.Message = "Post cancellato correttamente!";
-            response.Success = true;
+            var response = new Response
+            {
+                Message = "Post cancellato correttamente!",
+                Success = true
+            };
 
             return Ok(response);
         }

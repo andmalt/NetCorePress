@@ -1,33 +1,25 @@
-using System.Threading.Tasks;
 using NetCorePress.Authentication;
 using NetCorePress.Models;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.AspNetCore.Identity;
 
 
 namespace NetCorePress.Services
 {
     public class PostRepository : IPostRepository
     {
-        ApplicationDbContext _applicationDbContext;
-        private readonly UserManager<ApplicationUser> _userManager;
-        private readonly IHttpContextAccessor _httpContextAccessor;
+        private readonly ApplicationDbContext _applicationDbContext;
 
         public PostRepository(
-            ApplicationDbContext applicationDbContext,
-            UserManager<ApplicationUser> userManager,
-            IHttpContextAccessor httpContextAccessor
+            ApplicationDbContext applicationDbContext
         )
         {
             _applicationDbContext = applicationDbContext;
-            _userManager = userManager;
-            _httpContextAccessor = httpContextAccessor;
         }
 
         public async Task<bool> Save()
         {
             var saved = await _applicationDbContext.SaveChangesAsync();
-            return saved >= 0 ? true : false;
+            return saved >= 0;
         }
 
         public async Task<bool> ExistPost(int id)
