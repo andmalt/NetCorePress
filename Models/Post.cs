@@ -7,13 +7,14 @@ namespace NetCorePress.Models
     public class Post
     {
         [Key]
-        [Required]
         public int Id { get; set; }
 
+        [Required]
         [MinLength(3, ErrorMessage = "Il titolo deve contenere almeno 3 caratteri")]
         [MaxLength(255, ErrorMessage = "Il titolo deve contenere al massimo 255 caratteri")]
         public string? Title { get; set; }
 
+        [Required]
         [MinLength(1, ErrorMessage = "Il messaggio deve contenere almeno un carattere")]
         public string? Message { get; set; }
 

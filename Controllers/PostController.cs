@@ -6,6 +6,7 @@ using NetCorePress.Services;
 using System.Security.Claims;
 using Microsoft.AspNetCore.Identity;
 using NetCorePress.Dtos;
+using NetCorePress.Models.Enums;
 
 namespace NetCorePress.Controllers
 {
@@ -114,7 +115,7 @@ namespace NetCorePress.Controllers
             {
                 return BadRequest(ModelState);
             }
-            // Imposta la data di creazione al momento attuale
+            // Set the creation date to now
             post.CreationDate = DateTime.Now;
             post.UpdateDate = DateTime.Now;
             ClaimsPrincipal userClaimsPrincipal = _httpContextAccessor.HttpContext!.User;
@@ -149,16 +150,16 @@ namespace NetCorePress.Controllers
             return Ok(response);
         }
 
-        [HttpPut]
-        [Route("update")]
-        public async Task<IActionResult> UpdatePost([FromBody] Post post)
+        [HttpPatch]
+        [Route("update/{id}")]
+        public async Task<IActionResult> UpdatePost(int id, [FromBody] PostPatchDTO postPatch)
         {
             if (!ModelState.IsValid)
             {
                 return BadRequest(ModelState);
             }
 
-            var existPost = await _postRepository.ExistPost(post.Id);
+            var existPost = await _postRepository.ExistPost(id);
 
             if (!existPost)
             {
@@ -170,15 +171,28 @@ namespace NetCorePress.Controllers
                 return NotFound(resp);
             }
 
-            post.UpdateDate = DateTime.Now;
-            ClaimsPrincipal userClaimsPrincipal = _httpContextAccessor.HttpContext!.User;
-            post.UserId = _userManager.GetUserId(userClaimsPrincipal);
+            var existingPost = await _postRepository.SelectPost(id);
 
-            bool isUpdated = await _postRepository.UpdatePost(post);
+            existingPost.Title = postPatch.Title;
+            existingPost.Message = postPatch.Message;
+
+            if (Enum.IsDefined(typeof(Category), postPatch.Category))
+            {
+                existingPost.Category = postPatch.Category;
+            }
+            else
+            {
+                ModelState.AddModelError("Category", "La categoria specificata non è valida.");
+                return BadRequest(ModelState);
+            }
+
+            existingPost.UpdateDate = DateTime.Now;
+
+            bool isUpdated = await _postRepository.UpdatePost(existingPost);
 
             if (!isUpdated)
             {
-                ModelState.AddModelError("", $"Ci sono stati problemi nella modifica del post '{post.Title}' ");
+                ModelState.AddModelError("", $"Ci sono stati problemi nella modifica del post '{existingPost.Title}' ");
                 return StatusCode(500, ModelState);
             }
 
@@ -192,17 +206,17 @@ namespace NetCorePress.Controllers
         }
 
         [HttpDelete]
-        [Route("delete")]
-        public async Task<IActionResult> RemovePost([FromBody] Post post)
+        [Route("delete/{id}")]
+        public async Task<IActionResult> RemovePost(int id)
         {
             if (!ModelState.IsValid)
             {
                 return BadRequest(ModelState);
             }
 
-            var existPost = await _postRepository.ExistPost(post.Id);
+            var existingPost = await _postRepository.SelectPost(id);
 
-            if (!existPost)
+            if (existingPost == null)
             {
                 var resp = new Response
                 {
@@ -212,11 +226,11 @@ namespace NetCorePress.Controllers
                 return NotFound(resp);
             }
 
-            bool isDeleted = await _postRepository.DeletePost(post);
+            bool isDeleted = await _postRepository.DeletePost(existingPost);
 
             if (!isDeleted)
             {
-                ModelState.AddModelError("", $"Ci sono stati problemi nella cancellazione del post '{post.Title}' ");
+                ModelState.AddModelError("", $"Ci sono stati problemi nella cancellazione del post '{existingPost.Title}' ");
                 return StatusCode(500, ModelState);
             }
 
