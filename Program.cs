@@ -5,6 +5,7 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 using NetCorePress.Authentication;
 using NetCorePress.Services;
+using NetCorePress.Services.Seeders;
 
 var builder = WebApplication.CreateBuilder(args);
 ConfigurationManager configuration = builder.Configuration;
@@ -15,6 +16,7 @@ ConfigurationManager configuration = builder.Configuration;
 builder.Services.AddDbContext<ApplicationDbContext>(options => options.UseSqlServer(configuration.GetConnectionString("ConnStr")));
 
 builder.Services.AddScoped<IPostRepository, PostRepository>();
+builder.Services.AddTransient<PostSeeder>();
 // For Identity
 builder.Services.AddIdentity<ApplicationUser, IdentityRole>()
     .AddEntityFrameworkStores<ApplicationDbContext>()
@@ -53,6 +55,13 @@ builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 
 var app = builder.Build();
+
+using (var scope = app.Services.CreateScope())
+{
+    var serviceProvider = scope.ServiceProvider;
+    var postSeeder = scope.ServiceProvider.GetRequiredService<PostSeeder>();
+    postSeeder.Seed(serviceProvider);
+}
 
 // Configure the HTTP request pipeline.
 if (app.Environment.IsDevelopment())
