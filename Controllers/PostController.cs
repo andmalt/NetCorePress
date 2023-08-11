@@ -12,7 +12,6 @@ namespace NetCorePress.Controllers
 {
     [ApiController]
     [Route("api/post")]
-    [Authorize(AuthenticationSchemes = "Bearer")]
     public class PostController : ControllerBase
     {
         private readonly IPostRepository _postRepository;
@@ -109,6 +108,7 @@ namespace NetCorePress.Controllers
 
         [HttpPost]
         [Route("create")]
+        [Authorize(AuthenticationSchemes = "Bearer")]
         public async Task<IActionResult> Create([FromBody] Post post)
         {
             if (!ModelState.IsValid)
@@ -152,6 +152,7 @@ namespace NetCorePress.Controllers
 
         [HttpPatch]
         [Route("update/{id}")]
+        [Authorize(AuthenticationSchemes = "Bearer")]
         public async Task<IActionResult> UpdatePost(int id, [FromBody] PostPatchDTO postPatch)
         {
             if (!ModelState.IsValid)
@@ -207,6 +208,7 @@ namespace NetCorePress.Controllers
 
         [HttpDelete]
         [Route("delete/{id}")]
+        [Authorize(AuthenticationSchemes = "Bearer")]
         public async Task<IActionResult> RemovePost(int id)
         {
             if (!ModelState.IsValid)
