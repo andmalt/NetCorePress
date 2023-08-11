@@ -1,2 +1,8 @@
-/bin
-/obj
+# IDE files
+.vs/
+.vscode/
+
+# Build files
+build/
+bin/
+obj/
