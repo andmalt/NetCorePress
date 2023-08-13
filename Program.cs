@@ -10,13 +10,14 @@ using NetCorePress.Services.Seeders;
 var builder = WebApplication.CreateBuilder(args);
 ConfigurationManager configuration = builder.Configuration;
 
-// Add services.
+//** Add services **//
 
-// For Entity Framework
+// Added database
 builder.Services.AddDbContext<ApplicationDbContext>(options => options.UseSqlServer(configuration.GetConnectionString("ConnStr")));
 
 builder.Services.AddScoped<IPostRepository, PostRepository>();
 builder.Services.AddTransient<DBSeeder>();
+
 // For Identity
 builder.Services.AddIdentity<ApplicationUser, IdentityRole>()
     .AddEntityFrameworkStores<ApplicationDbContext>()
@@ -56,11 +57,12 @@ builder.Services.AddSwaggerGen();
 
 var app = builder.Build();
 
+// add seeder
 using (var scope = app.Services.CreateScope())
 {
     var serviceProvider = scope.ServiceProvider;
     var DBSeeder = scope.ServiceProvider.GetRequiredService<DBSeeder>();
-    await DBSeeder.Seed(serviceProvider);
+    await DBSeeder.Seed();
 }
 
 // Configure the HTTP request pipeline.

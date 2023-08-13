@@ -9,15 +9,17 @@ namespace NetCorePress.Services.Seeders
     public class DBSeeder
     {
         private readonly UserManager<ApplicationUser> _userManager;
+        private readonly IServiceProvider _serviceProvider;
 
-        public DBSeeder(UserManager<ApplicationUser> userManager)
+        public DBSeeder(UserManager<ApplicationUser> userManager, IServiceProvider serviceProvider)
         {
             _userManager = userManager;
+            _serviceProvider = serviceProvider;
         }
 
-        public async Task Seed(IServiceProvider serviceProvider)
+        public async Task Seed()
         {
-            using var context = serviceProvider.GetRequiredService<ApplicationDbContext>();
+            using var context = _serviceProvider.GetRequiredService<ApplicationDbContext>();
 
             if (!context.Users.Any())
             {

@@ -36,6 +36,7 @@ namespace NetCorePress.Controllers
 
             var posts = await _postRepository.AllPost();
 
+
             if (posts.Count == 0)
             {
                 return NotFound(string.Format("Non è stato trovato nessun articolo"));
@@ -44,6 +45,21 @@ namespace NetCorePress.Controllers
 
             foreach (var post in posts)
             {
+                var newComments = new List<CommentDto>();
+                foreach (var comment in post.Comments!)
+                {
+                    var newComment = new CommentDto
+                    {
+                        Id = comment.Id,
+                        Text = comment.Text,
+                        PostId = comment.PostId,
+                        UserId = comment.UserId,
+                        CreationDate = comment.CreationDate,
+                        UpdateDate = comment.UpdateDate,
+                    };
+                    newComments.Add(newComment);
+                }
+
                 var newPost = new PostDto
                 {
                     Id = post.Id,
@@ -52,7 +68,8 @@ namespace NetCorePress.Controllers
                     UserId = post.UserId,
                     Category = post.Category,
                     CreationDate = post.CreationDate,
-                    UpdateDate = post.UpdateDate
+                    UpdateDate = post.UpdateDate,
+                    Comments = newComments,
                 };
                 newPosts.Add(newPost);
             }
@@ -85,12 +102,29 @@ namespace NetCorePress.Controllers
 
             var post = await _postRepository.SelectPost(id);
 
+            var newComments = new List<CommentDto>();
+
+            foreach (var comment in post.Comments!)
+            {
+                var newComment = new CommentDto()
+                {
+                    Id = comment.Id,
+                    Text = comment.Text,
+                    UserId = comment.UserId,
+                    PostId = comment.PostId,
+                    CreationDate = comment.CreationDate,
+                    UpdateDate = comment.UpdateDate,
+                };
+                newComments.Add(newComment);
+            }
+
             var newPost = new PostDto
             {
                 Id = post.Id,
                 Title = post.Title,
                 Message = post.Message,
                 UserId = post.UserId,
+                Comments = newComments,
                 Category = post.Category,
                 CreationDate = post.CreationDate,
                 UpdateDate = post.UpdateDate
@@ -176,6 +210,7 @@ namespace NetCorePress.Controllers
 
             existingPost.Title = postPatch.Title;
             existingPost.Message = postPatch.Message;
+            existingPost.UpdateDate = DateTime.Now;
 
             if (Enum.IsDefined(typeof(Category), postPatch.Category))
             {
@@ -186,8 +221,6 @@ namespace NetCorePress.Controllers
                 ModelState.AddModelError("Category", "La categoria specificata non è valida.");
                 return BadRequest(ModelState);
             }
-
-            existingPost.UpdateDate = DateTime.Now;
 
             bool isUpdated = await _postRepository.UpdatePost(existingPost);
 
@@ -211,11 +244,6 @@ namespace NetCorePress.Controllers
         [Authorize(AuthenticationSchemes = "Bearer")]
         public async Task<IActionResult> RemovePost(int id)
         {
-            if (!ModelState.IsValid)
-            {
-                return BadRequest(ModelState);
-            }
-
             var existingPost = await _postRepository.SelectPost(id);
 
             if (existingPost == null)

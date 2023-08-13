@@ -1,4 +1,5 @@
 using System.ComponentModel.DataAnnotations;
+using NetCorePress.Models;
 using NetCorePress.Models.Enums;
 
 namespace NetCorePress.Dtos
@@ -12,6 +13,8 @@ namespace NetCorePress.Dtos
         public string? Message { get; set; }
 
         public string? UserId { get; set; }
+
+        public ICollection<CommentDto>? Comments { get; set; }
 
         public Category Category { get; set; }
 

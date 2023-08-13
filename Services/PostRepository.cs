@@ -31,7 +31,10 @@ namespace NetCorePress.Services
 
         public async Task<ICollection<Post>> AllPost()
         {
-            List<Post> posts = await _applicationDbContext.Posts.ToListAsync();
+            List<Post> posts = await _applicationDbContext.Posts
+                .Include(p => p.Comments)
+                .ToListAsync();
+
             return posts;
         }
 
@@ -39,7 +42,8 @@ namespace NetCorePress.Services
         {
             // Use SingleOrDefaultAsync to get the post with the specified id (if it exists)
             Post? post = await _applicationDbContext.Posts
-                .SingleOrDefaultAsync(a => a.Id == id);
+                .Include(p => p.Comments)
+                .SingleOrDefaultAsync(p => p.Id == id);
 
             return post!;
         }
