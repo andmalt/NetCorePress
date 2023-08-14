@@ -29,6 +29,7 @@ namespace NetCorePress.Services
             .AnyAsync(c => c.Id == id);
         }
 
+        // ! query without pagination
         public async Task<ICollection<Post>> AllPost()
         {
             List<Post> posts = await _applicationDbContext.Posts
@@ -37,6 +38,31 @@ namespace NetCorePress.Services
 
             return posts;
         }
+
+        // ! query with pagination
+        public async Task<PagedResult<Post>> GetPagedPosts(int page, int pageSize)
+        {
+            var totalItems = await _applicationDbContext.Posts.CountAsync();
+            var posts = await _applicationDbContext.Posts
+                .Include(p => p.Comments)
+                .OrderByDescending(p => p.UpdateDate)
+                .Skip((page - 1) * pageSize)
+                .Take(pageSize)
+                .ToListAsync();
+
+            return new PagedResult<Post>
+            {
+                // 
+                TotalItems = totalItems,
+                // page number
+                Page = page,
+                // items per page
+                PageSize = pageSize,
+                //
+                Data = posts
+            };
+        }
+
 
         public async Task<Post> SelectPost(int id)
         {

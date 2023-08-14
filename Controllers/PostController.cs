@@ -29,7 +29,63 @@ namespace NetCorePress.Controllers
             _httpContextAccessor = httpContextAccessor;
         }
 
-        [HttpPost]
+        [HttpGet]
+        [Route("getpaged")]
+        public async Task<IActionResult> GetPagedPosts(int page = 1, int pageSize = 10)
+        {
+            var pagedPosts = await _postRepository.GetPagedPosts(page, pageSize);
+
+            if (pagedPosts.Data!.Count == 0)
+            {
+                return NotFound(string.Format("Non è stato trovato nessun articolo"));
+            }
+
+            var newPosts = new List<PostDto>();
+
+            foreach (var post in pagedPosts.Data)
+            {
+                var newComments = new List<CommentDto>();
+                foreach (var comment in post.Comments!)
+                {
+                    var newComment = new CommentDto
+                    {
+                        Id = comment.Id,
+                        Text = comment.Text,
+                        PostId = comment.PostId,
+                        UserId = comment.UserId,
+                        CreationDate = comment.CreationDate,
+                        UpdateDate = comment.UpdateDate,
+                    };
+                    newComments.Add(newComment);
+                }
+
+                var newPost = new PostDto
+                {
+                    Id = post.Id,
+                    Title = post.Title,
+                    Message = post.Message,
+                    UserId = post.UserId,
+                    Category = post.Category,
+                    CreationDate = post.CreationDate,
+                    UpdateDate = post.UpdateDate,
+                    Comments = newComments,
+                };
+                newPosts.Add(newPost);
+            }
+
+            // * pagination
+            var pagedPostsDto = new PagedResult<PostDto>
+            {
+                TotalItems = pagedPosts.TotalItems,
+                Page = pagedPosts.Page,
+                PageSize = pagedPosts.PageSize,
+                Data = newPosts
+            };
+
+            return Ok(pagedPostsDto);
+        }
+
+        [HttpGet]
         [Route("all-posts")]
         public async Task<IActionResult> GetAllPosts()
         {
@@ -78,7 +134,7 @@ namespace NetCorePress.Controllers
             {
                 Success = true,
                 Message = "Post elencati con successo!",
-                Items = newPosts
+                Data = newPosts
             };
 
             return Ok(response);
@@ -134,7 +190,7 @@ namespace NetCorePress.Controllers
             {
                 Success = true,
                 Message = "Post trovato con successo!",
-                Items = newPost
+                Data = newPost
             };
 
             return Ok(response);
@@ -178,7 +234,7 @@ namespace NetCorePress.Controllers
             {
                 Success = true,
                 Message = "Post creato con successo!",
-                Items = newPost
+                Data = newPost
             };
 
             return Ok(response);

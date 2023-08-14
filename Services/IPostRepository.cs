@@ -10,6 +10,7 @@ namespace NetCorePress.Services
     {
         Task<bool> Save();
         Task<ICollection<Post>> AllPost();
+        Task<PagedResult<Post>> GetPagedPosts(int page, int pageSize);
         Task<Post> SelectPost(int id);
         Task<bool> ExistPost(int id);
         Task<bool> CreatePost(Post post);
