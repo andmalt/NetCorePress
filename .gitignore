@@ -6,3 +6,6 @@
 build/
 bin/
 obj/
+
+# test front-end
+client/

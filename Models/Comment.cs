@@ -9,6 +9,7 @@ namespace NetCorePress.Models
         public int Id { get; set; }
 
         [Required]
+        [MinLength(5, ErrorMessage = "Il commento deve contenere almeno cinque caratteri")]
         public string? Text { get; set; }
 
         [Required]

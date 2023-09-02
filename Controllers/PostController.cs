@@ -7,9 +7,11 @@ using System.Security.Claims;
 using Microsoft.AspNetCore.Identity;
 using NetCorePress.Dtos;
 using NetCorePress.Models.Enums;
+using Microsoft.AspNetCore.Cors;
 
 namespace NetCorePress.Controllers
 {
+    [EnableCors("myPolicy")]
     [ApiController]
     [Route("api/post")]
     public class PostController : ControllerBase
@@ -29,6 +31,7 @@ namespace NetCorePress.Controllers
             _httpContextAccessor = httpContextAccessor;
         }
 
+        [DisableCors]
         [HttpGet]
         [Route("getpaged")]
         public async Task<IActionResult> GetPagedPosts(int page = 1, int pageSize = 10)

@@ -17,6 +17,10 @@ namespace NetCorePress.Services.Seeders
             _serviceProvider = serviceProvider;
         }
 
+        /// <summary>
+        /// Seed the data in the db
+        /// </summary>
+        /// <returns>Void</returns>
         public async Task Seed()
         {
             using var context = _serviceProvider.GetRequiredService<ApplicationDbContext>();

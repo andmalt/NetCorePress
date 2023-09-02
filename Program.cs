@@ -18,6 +18,17 @@ builder.Services.AddDbContext<ApplicationDbContext>(options => options.UseSqlSer
 builder.Services.AddScoped<IPostRepository, PostRepository>();
 builder.Services.AddTransient<DBSeeder>();
 
+builder.Services.AddCors(options =>
+{
+    options.AddPolicy(name: "myPolicy",
+        policy =>
+        {
+            policy.WithOrigins("http://localhost:3000", "*")
+                .AllowAnyHeader()
+                .WithMethods("DELETE", "GET", "POST", "PATCH");
+        });
+});
+
 // For Identity
 builder.Services.AddIdentity<ApplicationUser, IdentityRole>()
     .AddEntityFrameworkStores<ApplicationDbContext>()
@@ -49,6 +60,7 @@ builder.Services.AddAuthentication(options =>
         IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(configuration["JWT:Secret"]))
     };
 });
+
 builder.Services.AddAuthorization();
 builder.Services.AddControllers();
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
@@ -74,8 +86,11 @@ if (app.Environment.IsDevelopment())
 
 app.UseHttpsRedirection();
 
+app.UseCors("myPolicy");
+
 app.UseAuthentication();
 app.UseAuthorization();
+
 
 app.MapControllers();
 
