@@ -4,12 +4,14 @@ using Microsoft.AspNetCore.Mvc;
 using NetCorePress.Authentication;
 using NetCorePress.Dtos;
 using NetCorePress.Services;
+using NetCorePress.Services.Repositories.Interfaces;
 using NetCorePress.Models;
 using System.Security.Claims;
 using Microsoft.AspNetCore.Cors;
 
 namespace NetCorePress.Controllers
 {
+    [EnableCors("myPolicy")]
     [ApiController]
     [Route("api/comment")]
     public class CommentController : ControllerBase
@@ -31,7 +33,7 @@ namespace NetCorePress.Controllers
 
         [HttpGet]
         [Route("getcomment/{id}")]
-        public async Task<IActionResult> Get(int id)
+        public async Task<IActionResult> GetComment(int id)
         {
             var exists = await _commentRepository.ExistComment(id);
             if (!exists)
@@ -46,15 +48,7 @@ namespace NetCorePress.Controllers
 
             var comment = await _commentRepository.GetComment(id);
 
-            var newComment = new CommentDto()
-            {
-                Id = comment.Id,
-                Text = comment.Text,
-                PostId = comment.PostId,
-                UserId = comment.UserId,
-                CreationDate = comment.CreationDate,
-                UpdateDate = comment.UpdateDate,
-            };
+            var newComment = new CommentDto(comment);
 
             var response = new Response<CommentDto>
             {
@@ -76,12 +70,6 @@ namespace NetCorePress.Controllers
                 return BadRequest(ModelState);
             }
 
-            // Set the creation date to now
-            comment.CreationDate = DateTime.Now;
-            comment.UpdateDate = DateTime.Now;
-            ClaimsPrincipal userClaimsPrincipal = _httpContextAccessor.HttpContext!.User;
-            comment.UserId = _userManager.GetUserId(userClaimsPrincipal);
-
             var isCreated = await _commentRepository.Create(comment);
 
             if (!isCreated)
@@ -90,15 +78,7 @@ namespace NetCorePress.Controllers
                 return StatusCode(500, ModelState);
             }
 
-            var newComment = new CommentDto()
-            {
-                Id = comment.Id,
-                Text = comment.Text,
-                PostId = comment.PostId,
-                UserId = comment.UserId,
-                CreationDate = comment.CreationDate,
-                UpdateDate = comment.UpdateDate,
-            };
+            var newComment = new CommentDto(comment);
 
             var response = new Response<CommentDto>()
             {

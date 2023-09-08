@@ -4,9 +4,11 @@ using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 using NetCorePress.Authentication;
-using NetCorePress.Services;
+using NetCorePress.Services.Repositories;
+using NetCorePress.Services.Repositories.Interfaces;
 using NetCorePress.Services.Seeders;
 
+var myPolicy = "myPolicy";
 var builder = WebApplication.CreateBuilder(args);
 ConfigurationManager configuration = builder.Configuration;
 
@@ -20,10 +22,10 @@ builder.Services.AddTransient<DBSeeder>();
 
 builder.Services.AddCors(options =>
 {
-    options.AddPolicy(name: "myPolicy",
+    options.AddPolicy(name: myPolicy,
         policy =>
         {
-            policy.WithOrigins("http://localhost:3000", "*")
+            policy.WithOrigins("http://localhost:3000")
                 .AllowAnyHeader()
                 .WithMethods("DELETE", "GET", "POST", "PATCH");
         });
@@ -86,7 +88,7 @@ if (app.Environment.IsDevelopment())
 
 app.UseHttpsRedirection();
 
-app.UseCors("myPolicy");
+app.UseCors(myPolicy);
 
 app.UseAuthentication();
 app.UseAuthorization();

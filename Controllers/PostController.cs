@@ -3,11 +3,11 @@ using Microsoft.AspNetCore.Mvc;
 using NetCorePress.Authentication;
 using NetCorePress.Models;
 using NetCorePress.Services;
-using System.Security.Claims;
-using Microsoft.AspNetCore.Identity;
+using NetCorePress.Services.Repositories.Interfaces;
 using NetCorePress.Dtos;
 using NetCorePress.Models.Enums;
 using Microsoft.AspNetCore.Cors;
+using Microsoft.AspNetCore.Identity;
 
 namespace NetCorePress.Controllers
 {
@@ -16,22 +16,21 @@ namespace NetCorePress.Controllers
     [Route("api/post")]
     public class PostController : ControllerBase
     {
-        private readonly IPostRepository _postRepository;
         private readonly UserManager<ApplicationUser> _userManager;
         private readonly IHttpContextAccessor _httpContextAccessor;
+        private readonly IPostRepository _postRepository;
 
         public PostController(
             IPostRepository postRepository,
-            UserManager<ApplicationUser> userManager,
-            IHttpContextAccessor httpContextAccessor
+            IHttpContextAccessor httpContextAccessor,
+            UserManager<ApplicationUser> userManager
             )
         {
             _postRepository = postRepository;
-            _userManager = userManager;
             _httpContextAccessor = httpContextAccessor;
+            _userManager = userManager;
         }
 
-        [DisableCors]
         [HttpGet]
         [Route("getpaged")]
         public async Task<IActionResult> GetPagedPosts(int page = 1, int pageSize = 10)
@@ -50,29 +49,13 @@ namespace NetCorePress.Controllers
                 var newComments = new List<CommentDto>();
                 foreach (var comment in post.Comments!)
                 {
-                    var newComment = new CommentDto
-                    {
-                        Id = comment.Id,
-                        Text = comment.Text,
-                        PostId = comment.PostId,
-                        UserId = comment.UserId,
-                        CreationDate = comment.CreationDate,
-                        UpdateDate = comment.UpdateDate,
-                    };
+                    var newComment = new CommentDto(comment);
                     newComments.Add(newComment);
                 }
 
-                var newPost = new PostDto
-                {
-                    Id = post.Id,
-                    Title = post.Title,
-                    Message = post.Message,
-                    UserId = post.UserId,
-                    Category = post.Category,
-                    CreationDate = post.CreationDate,
-                    UpdateDate = post.UpdateDate,
-                    Comments = newComments,
-                };
+                var newPost = new PostDto(post);
+                newPost.AddComments(newComments);
+
                 newPosts.Add(newPost);
             }
 
@@ -107,29 +90,13 @@ namespace NetCorePress.Controllers
                 var newComments = new List<CommentDto>();
                 foreach (var comment in post.Comments!)
                 {
-                    var newComment = new CommentDto
-                    {
-                        Id = comment.Id,
-                        Text = comment.Text,
-                        PostId = comment.PostId,
-                        UserId = comment.UserId,
-                        CreationDate = comment.CreationDate,
-                        UpdateDate = comment.UpdateDate,
-                    };
+                    var newComment = new CommentDto(comment);
                     newComments.Add(newComment);
                 }
 
-                var newPost = new PostDto
-                {
-                    Id = post.Id,
-                    Title = post.Title,
-                    Message = post.Message,
-                    UserId = post.UserId,
-                    Category = post.Category,
-                    CreationDate = post.CreationDate,
-                    UpdateDate = post.UpdateDate,
-                    Comments = newComments,
-                };
+                var newPost = new PostDto(post);
+                newPost.AddComments(newComments);
+
                 newPosts.Add(newPost);
             }
 
@@ -161,33 +128,17 @@ namespace NetCorePress.Controllers
 
             var post = await _postRepository.SelectPost(id);
 
-            var newComments = new List<CommentDto>();
+            var newListComments = new List<CommentDto>();
 
             foreach (var comment in post.Comments!)
             {
-                var newComment = new CommentDto()
-                {
-                    Id = comment.Id,
-                    Text = comment.Text,
-                    UserId = comment.UserId,
-                    PostId = comment.PostId,
-                    CreationDate = comment.CreationDate,
-                    UpdateDate = comment.UpdateDate,
-                };
-                newComments.Add(newComment);
+                var newComment = new CommentDto(comment);
+
+                newListComments.Add(newComment);
             }
 
-            var newPost = new PostDto
-            {
-                Id = post.Id,
-                Title = post.Title,
-                Message = post.Message,
-                UserId = post.UserId,
-                Comments = newComments,
-                Category = post.Category,
-                CreationDate = post.CreationDate,
-                UpdateDate = post.UpdateDate
-            };
+            var newPost = new PostDto(post);
+            newPost.AddComments(newListComments);
 
             var response = new Response<PostDto>
             {
@@ -208,11 +159,6 @@ namespace NetCorePress.Controllers
             {
                 return BadRequest(ModelState);
             }
-            // Set the creation date to now
-            post.CreationDate = DateTime.Now;
-            post.UpdateDate = DateTime.Now;
-            ClaimsPrincipal userClaimsPrincipal = _httpContextAccessor.HttpContext!.User;
-            post.UserId = _userManager.GetUserId(userClaimsPrincipal);
 
             var isCreated = await _postRepository.CreatePost(post);
 
@@ -222,22 +168,10 @@ namespace NetCorePress.Controllers
                 return StatusCode(500, ModelState);
             }
 
-            var newPost = new PostDto
-            {
-                Id = post.Id,
-                Title = post.Title,
-                Message = post.Message,
-                UserId = post.UserId,
-                Category = post.Category,
-                CreationDate = post.CreationDate,
-                UpdateDate = post.UpdateDate
-            };
-
-            var response = new Response<PostDto>
+            var response = new Response
             {
                 Success = true,
                 Message = "Post creato con successo!",
-                Data = newPost
             };
 
             return Ok(response);
@@ -267,21 +201,13 @@ namespace NetCorePress.Controllers
 
             var existingPost = await _postRepository.SelectPost(id);
 
-            existingPost.Title = postPatch.Title;
-            existingPost.Message = postPatch.Message;
-            existingPost.UpdateDate = DateTime.Now;
-
-            if (Enum.IsDefined(typeof(Category), postPatch.Category))
-            {
-                existingPost.Category = postPatch.Category;
-            }
-            else
+            if (!Enum.IsDefined(typeof(Category), postPatch.Category))
             {
                 ModelState.AddModelError("Category", "La categoria specificata non è valida.");
                 return BadRequest(ModelState);
             }
 
-            bool isUpdated = await _postRepository.UpdatePost(existingPost);
+            bool isUpdated = await _postRepository.UpdatePost(existingPost, postPatch);
 
             if (!isUpdated)
             {

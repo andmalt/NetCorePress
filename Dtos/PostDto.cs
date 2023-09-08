@@ -21,6 +21,27 @@ namespace NetCorePress.Dtos
         public DateTime? CreationDate { get; set; }
 
         public DateTime? UpdateDate { get; set; }
+
+        /// <summary>
+        /// PostDto is a data transfer object (DTO) of Post without comments initially,
+        /// but if you want you can to add comments with function "AddComments".
+        /// </summary>
+        /// <param name="post"></param>
+        public PostDto(Post post)
+        {
+            Id = post.Id;
+            Title = post.Title;
+            Message = post.Message;
+            UserId = post.UserId;
+            Category = post.Category;
+            CreationDate = post.CreationDate;
+            UpdateDate = post.UpdateDate;
+        }
+
+        public void AddComments(List<CommentDto> newComments)
+        {
+            Comments = newComments;
+        }
     }
 
     public class PostPatchDTO

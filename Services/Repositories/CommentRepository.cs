@@ -1,16 +1,28 @@
+using System.Security.Claims;
+using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using NetCorePress.Authentication;
 using NetCorePress.Models;
+using NetCorePress.Services.Repositories.Interfaces;
 
-namespace NetCorePress.Services
+namespace NetCorePress.Services.Repositories
 {
     public class CommentRepository : ICommentRepository
     {
         private readonly ApplicationDbContext _applicationDbContext;
+        private readonly IHttpContextAccessor _httpContextAccessor;
+        private readonly UserManager<ApplicationUser> _userManager;
 
-        public CommentRepository(ApplicationDbContext applicationDbContext)
+        public CommentRepository(
+            ApplicationDbContext applicationDbContext,
+            IHttpContextAccessor httpContextAccessor,
+            UserManager<ApplicationUser> userManager
+        )
         {
             _applicationDbContext = applicationDbContext;
+            _httpContextAccessor = httpContextAccessor;
+            _userManager = userManager;
         }
 
         public async Task<bool> Save()
@@ -27,6 +39,11 @@ namespace NetCorePress.Services
 
         public async Task<bool> Create(Comment comment)
         {
+            comment.CreationDate = DateTime.Now;
+            comment.UpdateDate = DateTime.Now;
+            ClaimsPrincipal userClaimsPrincipal = _httpContextAccessor.HttpContext!.User;
+            comment.UserId = _userManager.GetUserId(userClaimsPrincipal);
+
             await _applicationDbContext.AddAsync(comment);
             return await Save();
         }

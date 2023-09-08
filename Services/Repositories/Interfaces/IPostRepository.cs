@@ -2,9 +2,10 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using NetCorePress.Dtos;
 using NetCorePress.Models;
 
-namespace NetCorePress.Services
+namespace NetCorePress.Services.Repositories.Interfaces
 {
     public interface IPostRepository
     {
@@ -14,7 +15,7 @@ namespace NetCorePress.Services
         Task<Post> SelectPost(int id);
         Task<bool> ExistPost(int id);
         Task<bool> CreatePost(Post post);
-        Task<bool> UpdatePost(Post post);
+        Task<bool> UpdatePost(Post post, PostPatchDTO postPatch);
         Task<bool> DeletePost(Post post);
     }
 }

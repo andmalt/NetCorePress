@@ -1,6 +1,6 @@
 using NetCorePress.Models;
 
-namespace NetCorePress.Services
+namespace NetCorePress.Services.Repositories.Interfaces
 {
     public interface ICommentRepository
     {

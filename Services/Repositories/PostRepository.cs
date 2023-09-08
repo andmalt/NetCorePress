@@ -1,19 +1,30 @@
 using NetCorePress.Authentication;
 using NetCorePress.Models;
+using NetCorePress.Services.Repositories.Interfaces;
 using Microsoft.EntityFrameworkCore;
+using System.Security.Claims;
+using Microsoft.AspNetCore.Identity;
+using NetCorePress.Dtos;
+using NetCorePress.Models.Enums;
 
 
-namespace NetCorePress.Services
+namespace NetCorePress.Services.Repositories
 {
     public class PostRepository : IPostRepository
     {
+        private readonly UserManager<ApplicationUser> _userManager;
+        private readonly IHttpContextAccessor _httpContextAccessor;
         private readonly ApplicationDbContext _applicationDbContext;
 
         public PostRepository(
-            ApplicationDbContext applicationDbContext
+            ApplicationDbContext applicationDbContext,
+            IHttpContextAccessor httpContextAccessor,
+            UserManager<ApplicationUser> userManager
         )
         {
             _applicationDbContext = applicationDbContext;
+            _httpContextAccessor = httpContextAccessor;
+            _userManager = userManager;
         }
 
         public async Task<bool> Save()
@@ -76,13 +87,33 @@ namespace NetCorePress.Services
 
         public async Task<bool> CreatePost(Post post)
         {
+            post.CreationDate = DateTime.Now;
+            post.UpdateDate = DateTime.Now;
+            ClaimsPrincipal userClaimsPrincipal = _httpContextAccessor.HttpContext!.User;
+            post.UserId = _userManager.GetUserId(userClaimsPrincipal);
+
             // added a new post in the database
             await _applicationDbContext.AddAsync(post);
             return await Save();
         }
 
-        public async Task<bool> UpdatePost(Post post)
+        /// <summary>
+        /// Updates the post.
+        /// </summary>
+        /// <param name="post">Post to edit</param>
+        /// <param name="postPatch">Post edited</param>
+        /// <returns>bool</returns> <summary>
+        public async Task<bool> UpdatePost(Post post, PostPatchDTO postPatch)
         {
+            post.Title = postPatch.Title;
+            post.Message = postPatch.Message;
+            post.UpdateDate = DateTime.Now;
+
+            if (Enum.IsDefined(typeof(Category), postPatch.Category))
+            {
+                post.Category = postPatch.Category;
+            }
+
             _applicationDbContext.Update(post);
             return await Save();
         }
