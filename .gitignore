@@ -9,3 +9,6 @@ obj/
 
 # test front-end
 client/
+
+# config
+.env
