@@ -15,7 +15,7 @@ namespace NetCorePress.Services.Repositories.Interfaces
         Task<Post> SelectPost(int id);
         Task<bool> ExistPost(int id);
         Task<bool> CreatePost(Post post);
-        Task<bool> UpdatePost(Post post, PostPatchDTO postPatch);
+        Task<bool> UpdatePost(Post post, PatchPostDTO postPatch);
         Task<bool> DeletePost(Post post);
     }
 }

@@ -44,7 +44,7 @@ namespace NetCorePress.Dtos
         }
     }
 
-    public class PostPatchDTO
+    public class PatchPostDTO
     {
         [Required]
         [MinLength(3, ErrorMessage = "Il titolo deve contenere almeno 3 caratteri")]

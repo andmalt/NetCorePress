@@ -101,17 +101,17 @@ namespace NetCorePress.Services.Repositories
         /// Updates the post.
         /// </summary>
         /// <param name="post">Post to edit</param>
-        /// <param name="postPatch">Post edited</param>
+        /// <param name="patchPost">Post edited</param>
         /// <returns>bool</returns> <summary>
-        public async Task<bool> UpdatePost(Post post, PostPatchDTO postPatch)
+        public async Task<bool> UpdatePost(Post post, PatchPostDTO patchPost)
         {
-            post.Title = postPatch.Title;
-            post.Message = postPatch.Message;
+            post.Title = patchPost.Title;
+            post.Message = patchPost.Message;
             post.UpdateDate = DateTime.Now;
 
-            if (Enum.IsDefined(typeof(Category), postPatch.Category))
+            if (Enum.IsDefined(typeof(Category), patchPost.Category))
             {
-                post.Category = postPatch.Category;
+                post.Category = patchPost.Category;
             }
 
             _applicationDbContext.Update(post);

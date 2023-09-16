@@ -1,4 +1,5 @@
 
+using System.ComponentModel.DataAnnotations;
 using NetCorePress.Models;
 
 namespace NetCorePress.Dtos
@@ -30,5 +31,13 @@ namespace NetCorePress.Dtos
             CreationDate = comment.CreationDate;
             UpdateDate = comment.UpdateDate;
         }
+    }
+
+
+    public class PatchComment
+    {
+        [Required]
+        [MinLength(1, ErrorMessage = "Il commento deve contenere almeno un carattere")]
+        public string? Text { get; set; }
     }
 }

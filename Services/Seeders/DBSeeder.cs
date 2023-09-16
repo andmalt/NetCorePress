@@ -50,8 +50,8 @@ namespace NetCorePress.Services.Seeders
                     .RuleFor(p => p.UpdateDate, f => f.Date.Recent())
                     .Generate(15);
 
-                context.Posts.AddRange(fakePosts);
-                context.SaveChanges();
+                await context.Posts.AddRangeAsync(fakePosts);
+                await context.SaveChangesAsync();
             }
 
             if (!context.Comments.Any())
@@ -66,8 +66,8 @@ namespace NetCorePress.Services.Seeders
                     .RuleFor(c => c.UpdateDate, f => f.Date.Recent())
                     .Generate(40);
 
-                context.Comments.AddRange(fakeComments);
-                context.SaveChanges();
+                await context.Comments.AddRangeAsync(fakeComments);
+                await context.SaveChangesAsync();
             }
         }
     }

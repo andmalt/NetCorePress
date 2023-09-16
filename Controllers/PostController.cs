@@ -39,7 +39,7 @@ namespace NetCorePress.Controllers
 
             if (pagedPosts.Data!.Count == 0)
             {
-                return NotFound(string.Format("Non è stato trovato nessun articolo"));
+                return NotFound(string.Format("No posts were found"));
             }
 
             var newPosts = new List<PostDto>();
@@ -81,7 +81,7 @@ namespace NetCorePress.Controllers
 
             if (posts.Count == 0)
             {
-                return NotFound(string.Format("Non è stato trovato nessun articolo"));
+                return NotFound(string.Format("No posts were found"));
             }
             var newPosts = new List<PostDto>();
 
@@ -103,7 +103,7 @@ namespace NetCorePress.Controllers
             var response = new Response<ICollection<PostDto>>
             {
                 Success = true,
-                Message = "Post elencati con successo!",
+                Message = "Posts successfully listed!",
                 Data = newPosts
             };
 
@@ -121,7 +121,7 @@ namespace NetCorePress.Controllers
                 var resp = new Response
                 {
                     Success = false,
-                    Message = string.Format("Non è stato trovato il post!")
+                    Message = string.Format("The post was not found!")
                 };
                 return NotFound(resp);
             }
@@ -143,7 +143,7 @@ namespace NetCorePress.Controllers
             var response = new Response<PostDto>
             {
                 Success = true,
-                Message = "Post trovato con successo!",
+                Message = "Post successfully found!",
                 Data = newPost
             };
 
@@ -153,7 +153,7 @@ namespace NetCorePress.Controllers
         [HttpPost]
         [Route("create")]
         [Authorize(AuthenticationSchemes = "Bearer")]
-        public async Task<IActionResult> Create([FromBody] Post post)
+        public async Task<IActionResult> CreatePost([FromBody] Post post)
         {
             if (!ModelState.IsValid)
             {
@@ -164,14 +164,14 @@ namespace NetCorePress.Controllers
 
             if (!isCreated)
             {
-                ModelState.AddModelError("", $"Ci sono stati problemi nell'inserimento del post '{post.Title}' ");
+                ModelState.AddModelError("", $"There were problems inserting the post '{post.Title}' ");
                 return StatusCode(500, ModelState);
             }
 
             var response = new Response
             {
                 Success = true,
-                Message = "Post creato con successo!",
+                Message = "Post created successfully!",
             };
 
             return Ok(response);
@@ -180,7 +180,7 @@ namespace NetCorePress.Controllers
         [HttpPatch]
         [Route("update/{id}")]
         [Authorize(AuthenticationSchemes = "Bearer")]
-        public async Task<IActionResult> UpdatePost(int id, [FromBody] PostPatchDTO postPatch)
+        public async Task<IActionResult> UpdatePost(int id, [FromBody] PatchPostDTO patchPost)
         {
             if (!ModelState.IsValid)
             {
@@ -194,30 +194,30 @@ namespace NetCorePress.Controllers
                 var resp = new Response
                 {
                     Success = false,
-                    Message = string.Format("Non è stato trovato il post!")
+                    Message = string.Format("The post was not found!")
                 };
                 return NotFound(resp);
             }
 
             var existingPost = await _postRepository.SelectPost(id);
 
-            if (!Enum.IsDefined(typeof(Category), postPatch.Category))
+            if (!Enum.IsDefined(typeof(Category), patchPost.Category))
             {
-                ModelState.AddModelError("Category", "La categoria specificata non è valida.");
+                ModelState.AddModelError("Category", "The specified category is invalid.");
                 return BadRequest(ModelState);
             }
 
-            bool isUpdated = await _postRepository.UpdatePost(existingPost, postPatch);
+            bool isUpdated = await _postRepository.UpdatePost(existingPost, patchPost);
 
             if (!isUpdated)
             {
-                ModelState.AddModelError("", $"Ci sono stati problemi nella modifica del post '{existingPost.Title}' ");
+                ModelState.AddModelError("", $"There were problems editing the post '{existingPost.Title}' ");
                 return StatusCode(500, ModelState);
             }
 
             var response = new Response
             {
-                Message = "Post modificato correttamente!",
+                Message = "Post successfully edited!",
                 Success = true
             };
 
@@ -236,7 +236,7 @@ namespace NetCorePress.Controllers
                 var resp = new Response
                 {
                     Success = false,
-                    Message = string.Format("Non è stato trovato il post!")
+                    Message = string.Format("The post was not found!")
                 };
                 return NotFound(resp);
             }
@@ -245,13 +245,13 @@ namespace NetCorePress.Controllers
 
             if (!isDeleted)
             {
-                ModelState.AddModelError("", $"Ci sono stati problemi nella cancellazione del post '{existingPost.Title}' ");
+                ModelState.AddModelError("delPost", $"There were problems deleting the post '{existingPost.Title}' ");
                 return StatusCode(500, ModelState);
             }
 
             var response = new Response
             {
-                Message = "Post cancellato correttamente!",
+                Message = "Post successfully deleted!",
                 Success = true
             };
 

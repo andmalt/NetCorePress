@@ -3,6 +3,7 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using NetCorePress.Authentication;
+using NetCorePress.Dtos;
 using NetCorePress.Models;
 using NetCorePress.Services.Repositories.Interfaces;
 
@@ -56,8 +57,11 @@ namespace NetCorePress.Services.Repositories
             return comment!;
         }
 
-        public async Task<bool> Update(Comment comment)
+        public async Task<bool> Update(Comment comment, PatchComment patchComment)
         {
+            comment.UpdateDate = DateTime.Now;
+            comment.Text = patchComment.Text;
+
             _applicationDbContext.Update(comment);
             return await Save();
         }

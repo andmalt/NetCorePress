@@ -41,7 +41,7 @@ namespace NetCorePress.Controllers
                 var resp = new Response()
                 {
                     Success = false,
-                    Message = "Non è stato trovato nessun commento"
+                    Message = "No comments were found"
                 };
                 return NotFound(resp);
             }
@@ -53,7 +53,7 @@ namespace NetCorePress.Controllers
             var response = new Response<CommentDto>
             {
                 Success = true,
-                Message = "Commento trovato con successo",
+                Message = "Comment successfully found",
                 Data = newComment
             };
 
@@ -63,7 +63,7 @@ namespace NetCorePress.Controllers
         [HttpPost]
         [Route("create")]
         [Authorize(AuthenticationSchemes = "Bearer")]
-        public async Task<IActionResult> Create([FromBody] Comment comment)
+        public async Task<IActionResult> CreateComment([FromBody] Comment comment)
         {
             if (!ModelState.IsValid)
             {
@@ -74,19 +74,99 @@ namespace NetCorePress.Controllers
 
             if (!isCreated)
             {
-                ModelState.AddModelError("", $"Ci sono stati problemi nell'inserimento del post '{comment.Text}' ");
+                ModelState.AddModelError("", $"There were problems inserting the comment '{comment.Text}' ");
                 return StatusCode(500, ModelState);
             }
 
             var newComment = new CommentDto(comment);
 
-            var response = new Response<CommentDto>()
+            var response = new Response<CommentDto>
             {
                 Success = true,
                 Message = "The comment is created succesfully",
                 Data = newComment
             };
 
+            return Ok(response);
+        }
+
+        [HttpPut]
+        [Route("update/{id}")]
+        [Authorize(AuthenticationSchemes = "Bearer")]
+        public async Task<IActionResult> UpdateComment(int id, [FromBody] PatchComment patchComment)
+        {
+            if (!ModelState.IsValid)
+            {
+                return BadRequest(ModelState);
+            }
+
+            Comment comment = await _commentRepository.GetComment(id);
+
+            if (comment is null)
+            {
+                var res = new Response
+                {
+                    Success = false,
+                    Message = "Comment not found!",
+                };
+                return NotFound(res);
+            }
+
+            var isUpdated = await _commentRepository.Update(comment, patchComment);
+
+            if (isUpdated is false)
+            {
+                var res = new Response
+                {
+                    Success = false,
+                    Message = $"You were unable to edit the comment with ID:{comment.Id}",
+                };
+                return BadRequest(res);
+            }
+
+            var response = new Response
+            {
+                Success = true,
+                Message = "You were able to edit the comment"
+            };
+
+            return Ok(response);
+        }
+
+        [HttpDelete]
+        [Route("delete")]
+        [Authorize(AuthenticationSchemes = "Bearer")]
+        public async Task<IActionResult> DeleteComment(int id)
+        {
+            Comment comment = await _commentRepository.GetComment(id);
+
+            if (comment is null)
+            {
+                var res = new Response
+                {
+                    Success = false,
+                    Message = $"Comment with id{id} not found!"
+                };
+                return NotFound(res);
+            }
+
+            bool isDeleted = await _commentRepository.Delete(comment);
+
+            if (!isDeleted)
+            {
+                var res = new Response
+                {
+                    Success = false,
+                    Message = $"There is a problem to delete comment with id{comment.Id}"
+                };
+                return BadRequest(res);
+            }
+
+            var response = new Response
+            {
+                Success = true,
+                Message = "Comment successfully deleted"
+            };
             return Ok(response);
         }
     }
