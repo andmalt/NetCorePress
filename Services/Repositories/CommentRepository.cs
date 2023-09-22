@@ -1,5 +1,4 @@
 using System.Security.Claims;
-using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using NetCorePress.Authentication;
@@ -52,6 +51,7 @@ namespace NetCorePress.Services.Repositories
         public async Task<Comment> GetComment(int id)
         {
             Comment? comment = await _applicationDbContext.Comments
+                .Include(c => c.Post!.User)
                 .SingleOrDefaultAsync(c => c.Id == id);
 
             return comment!;

@@ -1,10 +1,8 @@
 using DotNetEnv;
-using System;
 using System.Net;
 using System.Net.Mail;
-using System.Threading.Tasks;
 
-namespace NetCorePress.Services.Messages
+namespace NetCorePress.Services.Emails
 {
     public class EmailService
     {

@@ -8,6 +8,7 @@ using NetCorePress.Services.Repositories.Interfaces;
 using NetCorePress.Models;
 using System.Security.Claims;
 using Microsoft.AspNetCore.Cors;
+using NetCorePress.Services.Emails;
 
 namespace NetCorePress.Controllers
 {
@@ -78,16 +79,36 @@ namespace NetCorePress.Controllers
                 return StatusCode(500, ModelState);
             }
 
-            var newComment = new CommentDto(comment);
+            var emailService = new EmailService();
 
-            var response = new Response<CommentDto>
+            var comm = await _commentRepository.GetComment(comment.Id);
+
+            var toEmail = await _userManager.GetEmailAsync(comm.Post!.User!);
+
+            string emailTemplate = System.IO.File.ReadAllText("./Services/Emails/Views/email.comment.html");
+            emailTemplate = emailTemplate.Replace("{{comment.Email}}", comm.User!.Email);
+            emailTemplate = emailTemplate.Replace("{{comment.Text}}", comm.Text);
+
+            bool emailSent = await emailService.SendEmailAsync("info.site@example.com", toEmail, "You received a comment", emailTemplate, true);
+
+            if (emailSent)
             {
-                Success = true,
-                Message = "The comment is created succesfully",
-                Data = newComment
-            };
-
-            return Ok(response);
+                var response = new Response
+                {
+                    Success = true,
+                    Message = "The comment is created and the email successfully sent"
+                };
+                return Ok(response);
+            }
+            else
+            {
+                var response = new Response
+                {
+                    Success = false,
+                    Message = "Email not sent"
+                };
+                return Ok(response);
+            }
         }
 
         [HttpPut]
