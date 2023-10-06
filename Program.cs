@@ -19,6 +19,7 @@ builder.Services.AddDbContext<ApplicationDbContext>(options => options.UseSqlSer
 
 builder.Services.AddScoped<IPostRepository, PostRepository>();
 builder.Services.AddScoped<ICommentRepository, CommentRepository>();
+builder.Services.AddScoped<IImageRepository, ImageRepository>();
 builder.Services.AddTransient<DBSeeder>();
 
 builder.Services.AddCors(options =>
@@ -28,7 +29,7 @@ builder.Services.AddCors(options =>
         {
             policy.WithOrigins("http://localhost:3000")
                 .AllowAnyHeader()
-                .WithMethods("DELETE", "GET", "POST", "PATCH");
+                .WithMethods("DELETE", "GET", "POST", "PATCH", "PUT");
         });
 });
 

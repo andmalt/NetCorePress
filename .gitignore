@@ -12,3 +12,6 @@ client/
 
 # config
 .env
+
+#storage
+Storage/
