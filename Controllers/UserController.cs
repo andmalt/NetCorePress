@@ -1,3 +1,4 @@
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using NetCorePress.Authentication;
@@ -8,6 +9,7 @@ namespace NetCorePress.Controllers
 {
     [ApiController]
     [Route("api/[controller]")]
+    [Authorize(AuthenticationSchemes = "Bearer")]
     public class UserController : ControllerBase
     {
         private readonly IImageRepository _imageRepository;
@@ -22,24 +24,24 @@ namespace NetCorePress.Controllers
         {
             if (file == null || file.Length == 0)
             {
-                return BadRequest("Invalid file");
+                return BadRequest(new Response { Success = false, Message = "Invalid file" });
             }
 
             if (!await _imageRepository.IsImageValid(file))
             {
-                return BadRequest("Invalid image format");
+                return BadRequest(new Response { Success = false, Message = "Invalid image format" });
             }
 
             if (!await _imageRepository.IsImageSizeValid(file))
             {
-                return BadRequest("Image dimensions are too large");
+                return BadRequest(new Response { Success = false, Message = "Image dimensions are too large" });
             }
 
             bool isSaved = await _imageRepository.SaveImage(file);
 
             if (!isSaved)
             {
-                return BadRequest("Image not saved");
+                return BadRequest(new Response { Success = false, Message = "Image not saved" });
             }
 
             var response = new Response

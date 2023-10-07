@@ -97,12 +97,6 @@ namespace NetCorePress.Services.Repositories
             return await Save();
         }
 
-        /// <summary>
-        /// Updates the post.
-        /// </summary>
-        /// <param name="post">Post to edit</param>
-        /// <param name="patchPost">Post edited</param>
-        /// <returns>bool</returns> <summary>
         public async Task<bool> UpdatePost(Post post, PatchPostDTO patchPost)
         {
             post.Title = patchPost.Title;

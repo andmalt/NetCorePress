@@ -42,11 +42,13 @@ namespace NetCorePress.Services.Repositories
 
             try
             {
+                ClaimsPrincipal userClaimsPrincipal = _httpContextAccessor.HttpContext!.User;
+                var user = await _userManager.GetUserAsync(userClaimsPrincipal);
+                string oldImage = user.AvatarPath!;
+                File.Delete(oldImage);
+                user.AvatarPath = filePath;
                 await file.CopyToAsync(stream);
-                // ClaimsPrincipal userClaimsPrincipal = _httpContextAccessor.HttpContext!.User;
-                // var user = await _userManager.GetUserAsync(userClaimsPrincipal);
-                // user.AvatarPath = filePath;
-                // await _userManager.UpdateAsync(user);
+                await _userManager.UpdateAsync(user);
 
                 return true;
             }
